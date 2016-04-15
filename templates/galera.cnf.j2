@@ -1,0 +1,36 @@
+[mysqld]
+datadir={{ galera_mysql_datadir }}
+skip-name-resolve=1
+binlog_format=ROW
+default-storage-engine=innodb
+innodb_autoinc_lock_mode=2
+innodb_locks_unsafe_for_binlog=1
+max_connections=2048
+query_cache_size=0
+query_cache_type=0
+{% for ipaddr in ansible_all_ipv4_addresses %}
+  {%- if ipaddr in galera_wsrep_cluster_address %}
+bind-address={{ ipaddr }}
+  {%- endif %}
+{% endfor %}
+
+wsrep_provider={{ galera_wsrep_provider }}
+wsrep_cluster_name={{ galera_wsrep_cluster_name }}
+wsrep_cluster_address="gcomm://{{ ",".join(galera_wsrep_cluster_address) }}"
+wsrep_slave_threads={{ galera_wsrep_slave_threads }}
+wsrep_certify_nonPK={{ galera_wsrep_certify_nonPK }}
+wsrep_max_ws_rows={{ galera_wsrep_max_ws_rows }}
+wsrep_max_ws_size={{ galera_wsrep_max_ws_size }}
+wsrep_debug={{ galera_wsrep_debug }}
+wsrep_convert_LOCK_to_trx={{ galera_wsrep_convert_lock_to_trx }}
+wsrep_retry_autocommit={{ galera_wsrep_retry_autocommit }}
+wsrep_auto_increment_control={{ galera_wsrep_auto_increment_control }}
+wsrep_drupal_282555_workaround={{ galera_wsrep_drupal_282555_workaround }}
+wsrep_causal_reads={{ galera_wsrep_causal_reads }}
+wsrep_notify_cmd={{ galera_wsrep_notify_cmd }}
+wsrep_sst_method={{ galera_wsrep_sst_method }}
+{% for ipaddr in ansible_all_ipv4_addresses %}
+  {%- if ipaddr in galera_wsrep_cluster_address %}
+wsrep_node_address={{ ipaddr }}
+  {%- endif %}
+{% endfor %}

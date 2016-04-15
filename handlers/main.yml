@@ -1,0 +1,8 @@
+---
+# handlers file for ansible-role-mariadb-galera
+
+- name: restart mariadb
+  service: name={{ mariadb_daemon }} state=restarted
+
+- name: bootstrap node
+  shell: /usr/libexec/mysqld --wsrep-new-cluster --user={{ mariadb_daemon_user }} &

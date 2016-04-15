@@ -1,0 +1,20 @@
+---
+# tasks file for clustercheck
+
+- name: clustercheck sysconfig file.
+  template: src=clustercheck.conf.j2 dest=/etc/sysconfig/clustercheck owner=root group=root mode=0644
+
+- name: galera monitor file
+  copy: src=galera-monitor dest=/etc/xinetd.d/galera-monitor owner=root group=root mode=0600
+
+- name: Ensure xinetd service is started and enabled on boot.
+  service: "name=xinetd state=started enabled=yes"
+
+- name: Ensure clustercheck users are present.
+  mysql_user:
+    name: "{{ galera_clustercheck_username }}"
+    host: "localhost"
+    password: "{{ galera_clustercheck_password }}"
+    priv: "*.*:ALL"
+    state: present
+  when: ansible_hostname == "{{ galera_bootstrap_node }}" or ansible_{{ galera_mgmt_nic }}.ipv4.address == "{{ galera_bootstrap_node }}"

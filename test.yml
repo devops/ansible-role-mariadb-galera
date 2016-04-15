@@ -1,0 +1,17 @@
+---
+# test file
+
+- name: Install MariaDB Galera.
+  hosts: servers
+  roles:
+    - role: ansible-role-mariadb-galera
+      mariadb_root_username: root
+      mariadb_root_password: root
+      mariadb_users:
+        - { name: "root", host: "%", password: "root", priv: "*.*:GRANT,ALL" }
+      galera_clustercheck_enable: true
+      galera_clustercheck_username: clustercheck
+      galera_clustercheck_password: clustercheck
+      galera_wsrep_cluster_address: ['192.168.100.11', '192.168.100.12', '192.168.100.13']
+      galera_mgmt_nic: "eth0"
+      galera_bootstrap_node: "192.168.100.11"

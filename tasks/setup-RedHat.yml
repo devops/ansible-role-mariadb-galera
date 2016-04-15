@@ -1,0 +1,10 @@
+---
+# tasks file setup-RedHat
+
+- name: Adding MariaDB Galera Repo.
+  template: src=mariadb-galera.repo.j2 dest=/etc/yum.repos.d/mariadb-galera.repo mode=644 owner=root group=root
+  when: mariadb_repo
+
+- name: "[CentOS] Ensure MariaDB packages are installed."
+  yum: "name={{ item }} state=installed"
+  with_items: __mariadb_packages

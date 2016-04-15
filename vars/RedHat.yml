@@ -1,0 +1,11 @@
+# vars file RedHat.yml
+
+mariadb_daemon: mariadb
+__mariadb_packages:
+  - mariadb-galera-server
+  - MySQL-python
+  - rsync
+  - xinetd
+mariadb_daemon_user: mysql
+mariadb_config_dir: /etc/my.cnf.d/
+mariadb_socket: /var/lib/mysql/mysql.sock

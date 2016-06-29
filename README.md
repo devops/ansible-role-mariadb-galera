@@ -16,7 +16,6 @@ None.
 * `galera_clustercheck_enable: false`
 * `galera_clustercheck_username: clustercheck`
 * `galera_clustercheck_password: clustercheck`
-* `galera_mgmt_nic: "eth0"`
 * `galera_bootstrap_node: ""`
 * `galera_wsrep_provider: /usr/lib64/galera/libgalera_smm.so`
 * `galera_wsrep_cluster_name: galera_cluster`
@@ -53,7 +52,6 @@ Including an example of how to use your role (for instance, with variables passe
           galera_clustercheck_username: clustercheck
           galera_clustercheck_password: clustercheck
           galera_wsrep_cluster_address: ['192.168.100.11', '192.168.100.12', '192.168.100.13']
-          galera_mgmt_nic: "eth0"
           galera_bootstrap_node: "192.168.100.11"
 
 ## Author Information

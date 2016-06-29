@@ -13,5 +13,4 @@
       galera_clustercheck_username: clustercheck
       galera_clustercheck_password: clustercheck
       galera_wsrep_cluster_address: ['192.168.100.11', '192.168.100.12', '192.168.100.13']
-      galera_mgmt_nic: "eth0"
       galera_bootstrap_node: "192.168.100.11"

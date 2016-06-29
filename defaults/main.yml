@@ -12,7 +12,6 @@ galera_clustercheck_username: clustercheck
 galera_clustercheck_password: clustercheck
 
 # Galera Configure
-galera_mgmt_nic: "eth0"
 galera_bootstrap_node: ""
 
 galera_mysql_datadir: "/var/lib/mysql"

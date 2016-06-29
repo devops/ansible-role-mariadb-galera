@@ -2,15 +2,26 @@
 # tasks file for galera
 
 - name: stop mariadb.
-  service: name={{ mariadb_daemon }} state=stopped
+  service:
+    name: "{{ mariadb_daemon }}"
+    state: stopped
 
 - name: Adding Galera Configuration.
-  template: src=galera.cnf.j2 dest={{ mariadb_config_dir }}/galera.cnf owner=root group=root mode=0644
+  template:
+    src: galera.cnf.j2
+    dest: "{{ mariadb_config_dir }}/galera.cnf"
+    owner: root
+    group: root
+    mode: 0644
 
 - name: Bootstraping the Cluster.
-  shell: /usr/libexec/mysqld --wsrep-new-cluster --user={{ mariadb_daemon_user }} &
+  shell: |
+    #/usr/libexec/mysqld --wsrep-new-cluster --user={{ mariadb_daemon_user }} &
+    /bin/sh /usr/bin/mysqld_safe --datadir={{ galera_mysql_datadir }} --pid-file=/var/run/{{ mariadb_daemon }}/{{ mariadb_daemon }}.pid --wsrep-new-cluster --user={{ mariadb_daemon_user }} &
   when: ansible_hostname == "{{ galera_bootstrap_node }}" or ansible_{{ galera_mgmt_nic }}.ipv4.address == "{{ galera_bootstrap_node }}"
 
 - name: Finalizing the Installation.
-  service: name={{ mariadb_daemon }} state=restarted
+  service:
+    name: "{{ mariadb_daemon }}"
+    state: restarted
   when: ansible_hostname != "{{ galera_bootstrap_node }}" and ansible_{{ galera_mgmt_nic }}.ipv4.address != "{{ galera_bootstrap_node }}"

@@ -8,5 +8,6 @@
     password: "{{ item.password }}"
     priv: "{{ item.priv | default('*.*:USAGE') }}"
     state: present
-  with_items: mariadb_users
+  with_items: 
+    - "{{ mariadb_users }}"
   run_once: True

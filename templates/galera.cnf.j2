@@ -14,6 +14,7 @@ bind-address={{ ipaddr }}
   {%- endif %}
 {% endfor %}
 
+wsrep_on={{ galera_wsrep_on }}
 wsrep_provider={{ galera_wsrep_provider }}
 wsrep_cluster_name={{ galera_wsrep_cluster_name }}
 wsrep_cluster_address="gcomm://{{ ",".join(galera_wsrep_cluster_address) }}"

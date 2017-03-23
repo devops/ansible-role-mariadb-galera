@@ -14,6 +14,7 @@ galera_clustercheck_password: clustercheck
 # Galera Configure
 galera_bootstrap_node: ""
 
+galera_wsrep_on: On
 galera_mysql_datadir: "/var/lib/mysql"
 galera_wsrep_provider: /usr/lib64/galera/libgalera_smm.so
 galera_wsrep_cluster_name: galera_cluster

@@ -9,3 +9,4 @@ __mariadb_packages:
 mariadb_daemon_user: mysql
 mariadb_config_dir: /etc/my.cnf.d/
 mariadb_socket: /var/lib/mysql/mysql.sock
+mariadb_pid_file: /var/run/mysql/mysql.pid

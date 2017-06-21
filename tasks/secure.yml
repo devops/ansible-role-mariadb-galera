@@ -1,19 +1,40 @@
+# vim: ft=ansible :
 ---
 # tasks file secure
 
-- name: Get list of hosts for the root user.
-  command: mysql -NBe 'SELECT Host FROM mysql.user WHERE User = "root" ORDER BY (Host="localhost") ASC'
-  register: mysql_root_hosts
-  changed_when: false
+- block:
+  - name: Get list of hosts for the root user.
+    command: mysql -NBe 'SELECT Host FROM mysql.user WHERE User = "root" ORDER BY (Host="localhost") ASC'
+    register: mysql_root_hosts
+    changed_when: false
 
-# 'localhost' needs to be last for idempotency.
-- name: Update MySQL root password for localhost root account.
-  mysql_user:
-    name: "root"
-    host: "{{ item }}"
-    password: "{{ mariadb_root_password }}"
-  with_items:
-    - "{{ mysql_root_hosts.stdout_lines }}"
+  # 'localhost' needs to be last for idempotency.
+  - name: Update MySQL root password for localhost root account.
+    mysql_user:
+      name: "root"
+      host: "{{ item }}"
+      password: "{{ mariadb_root_password }}"
+    with_items:
+      - "{{ mysql_root_hosts.stdout_lines }}"
+    vars:
+      ignore_errors: yes
+  rescue:
+  - name: Get list of hosts for the root user.
+    command: "mysql -p'{{ mariadb_root_password }}' -NBe \"SELECT Host FROM mysql.user WHERE User = '{{ mariadb_root_username }}' ORDER BY (Host='localhost') ASC\""
+    register: mysql_root_hosts
+    changed_when: false
+  # 'localhost' needs to be last for idempotency.
+  - name: Update MySQL root password for localhost root account.
+    mysql_user:
+      login_user: "{{ mariadb_root_username }}"
+      login_password: "{{ mariadb_root_password }}"
+      name: "{{ mariadb_root_username }}"
+      host: "{{ item }}"
+      password: "{{ mariadb_root_password }}"
+    with_items:
+      - "{{ mysql_root_hosts.stdout_lines }}"
+    vars:
+      ignore_errors: yes
 
 # Has to be after the root password assignment, for idempotency.
 - name: Copy .my.cnf file with root password credentials.
@@ -28,6 +49,7 @@
   command: mysql -NBe 'SELECT Host FROM mysql.user WHERE User = ""'
   register: mysql_anonymous_hosts
   changed_when: false
+  run_once: true
 
 - name: Remove anonymous MySQL users.
   mysql_user:
@@ -36,8 +58,10 @@
      state: absent
   with_items:
     - "{{ mysql_anonymous_hosts.stdout_lines}}"
+  run_once: true
 
 - name: Remove MySQL test database.
   mysql_db:
     name: "test"
     state: absent
+  run_once: true

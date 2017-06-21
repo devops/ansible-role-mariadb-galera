@@ -16,15 +16,17 @@
 
 - name: Bootstraping the Cluster.
   shell: |
+    /usr/sbin/service mysql start --wsrep-new-cluster
     #/usr/libexec/mysqld --wsrep-new-cluster --user={{ mariadb_daemon_user }} &
-    /bin/sh /usr/bin/mysqld_safe --datadir={{ galera_mysql_datadir }} --pid-file=/var/run/{{ mariadb_daemon }}/{{ mariadb_daemon }}.pid --wsrep-new-cluster --user={{ mariadb_daemon_user }} &
-  when: inventory_hostname == "{{ galera_bootstrap_node }}"
+    #/bin/sh /usr/bin/mysqld_safe --datadir={{ galera_mysql_datadir }} --pid-file=/var/run/{{ mariadb_daemon }}/{{ mariadb_daemon }}.pid --wsrep-new-cluster --user={{ mariadb_daemon_user }} &
+  when: inventory_hostname == galera_bootstrap_node
+  run_once: True
 
 - name: Start the other nodes.
   service:
     name: "{{ mariadb_daemon }}"
     state: restarted
-  when: inventory_hostname != "{{ galera_bootstrap_node }}"
+  when: inventory_hostname != galera_bootstrap_node
 
 - name: Wait for the cluster running and bootstrapped.
   command: mysql --silent --skip-column-names -e 'SHOW STATUS LIKE "wsrep_cluster_size"'
@@ -38,4 +40,4 @@
     systemctl restart "{{ mariadb_daemon }}"
   when:
     - galera_check_wait.stdout | search("3")
-    - inventory_hostname == "{{ galera_bootstrap_node }}"
+    - inventory_hostname == galera_bootstrap_node

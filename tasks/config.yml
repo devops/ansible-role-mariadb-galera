@@ -1,5 +1,66 @@
+# vim: ft=ansible :
 ---
 # tasks file for config
+- name: Create datadir
+  file:
+    path: "{{ galera_mysql_datadir }}"
+    state: directory
+    owner: "{{ mariadb_daemon_user }}"
+    group: "{{ mariadb_daemon_user }}"
+    mode: 0755
+    setype: mysqld_db_t
+  when: galera_mysql_datadir is defined
+
+- name: Create mysqld logfile
+  file:
+    path: "{{ mariadb_log }}"
+    state: file
+    owner: "{{ mariadb_daemon_user }}"
+    group: "{{ mariadb_daemon_user }}"
+  when: mariadb_log is defined
+
+- name: Setup mysqld log
+  ini_file:
+    path: "{{ mariadb_config_dir }}server.cnf"
+    owner: "{{ mariadb_daemon_user }}"
+    group: "{{ mariadb_daemon_user }}"
+    section: mysqld
+    option: log
+    value: "{{ mariadb_log }}"
+  when: mariadb_log is defined
+
+- name: Create mysqld logfile
+  file:
+    path: "{{ mariadb_log_error }}"
+    state: file
+    owner: mysql
+    group: mysql
+  when: mariadb_log_error is defined
+
+- name: Setup mysqld error log
+  ini_file:
+    path: "{{ mariadb_config_dir }}server.cnf"
+    owner: "{{ mariadb_daemon_user }}"
+    group: "{{ mariadb_daemon_user }}"
+    section: mysqld
+    option: log-error
+    value: "{{ mariadb_log_error }}"
+  when: mariadb_log_error is defined
+
+- name: Create mysqld PID dir
+  file:
+    path: "{{ mariadb_pid_file | dirname }}"
+    state: directory
+    owner: "{{ mariadb_daemon_user }}"
+    group: "{{ mariadb_daemon_user }}"
+    mode: 0755
+    setype: mysqld_db_t
+
+- name: Initialize datadir
+  command: |
+    /usr/bin/mysql_install_db --datadir=/appli/mysql/
+  args:
+    creates: /appli/mysql/mysql
 
 - name: Ensure MariaDB is started and enabled on boot.
   service:

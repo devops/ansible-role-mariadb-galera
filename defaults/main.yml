@@ -4,7 +4,10 @@ mariadb_repo: "True"
 mariadb_repo_baseurl: "http://yum.mariadb.org/5.5/centos7-amd64/"
 mariadb_root_username: root
 mariadb_root_password: root
+mariadb_client_port: 3306
+mariadb_server_port: 3306
 mariadb_users: []
+mariadb_mysql_pid: /var/run/mysql/mysql.pid
 
 # Clustercheck Configure
 galera_clustercheck_enable: false

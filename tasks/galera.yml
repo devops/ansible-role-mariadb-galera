@@ -1,43 +1,39 @@
+# vim: ft=ansible :
 ---
 # tasks file for galera
+- name: Check the cluster state
+  command: mysql --silent --skip-column-names -e 'SELECT VARIABLE_VALUE FROM information_schema.global_status where VARIABLE_NAME = "WSREP_CLUSTER_SIZE"'
+  register: wsrep_cluster_size
+  #  when:
+  #    - inventory_hostname == galera_bootstrap_node
 
-- name: stop mariadb.
-  service:
-    name: "{{ mariadb_daemon }}"
-    state: stopped
-
-- name: Adding Galera Configuration.
-  template:
-    src: galera.cnf.j2
-    dest: "{{ mariadb_config_dir }}/galera.cnf"
-    owner: root
-    group: root
-    mode: 0644
-
-- name: Bootstraping the Cluster.
-  shell: |
-    /usr/sbin/service mysql start --wsrep-new-cluster
-    #/usr/libexec/mysqld --wsrep-new-cluster --user={{ mariadb_daemon_user }} &
-    #/bin/sh /usr/bin/mysqld_safe --datadir={{ galera_mysql_datadir }} --pid-file=/var/run/{{ mariadb_daemon }}/{{ mariadb_daemon }}.pid --wsrep-new-cluster --user={{ mariadb_daemon_user }} &
-  when: inventory_hostname == galera_bootstrap_node
-  run_once: True
+- block:
+  - name: stop mariadb.
+    service:
+      name: "{{ mariadb_daemon }}"
+      state: stopped
+  - name: Bootstraping the Cluster.
+    shell: |
+      /usr/sbin/service mysql start --wsrep-new-cluster
+  - name: Make sure mariadb is started.
+    service:
+      name: "{{ mariadb_daemon }}"
+      state: started
+  when:
+    - inventory_hostname == galera_bootstrap_node
+    - wsrep_cluster_size.stdout == "0"
 
 - name: Start the other nodes.
   service:
     name: "{{ mariadb_daemon }}"
     state: restarted
-  when: inventory_hostname != galera_bootstrap_node
+  when:
+    - inventory_hostname != galera_bootstrap_node
+    - (wsrep_cluster_size.stdout == "0") or
+      (galera_config.changed)
 
 - name: Wait for the cluster running and bootstrapped.
   command: mysql --silent --skip-column-names -e 'SHOW STATUS LIKE "wsrep_cluster_size"'
   register: galera_check_wait
   until: galera_check_wait | success
   run_once: True
-
-- name: Finalizing the Installation.
-  shell: |
-    pkill -9 mysqld
-    systemctl restart "{{ mariadb_daemon }}"
-  when:
-    - galera_check_wait.stdout | search("3")
-    - inventory_hostname == galera_bootstrap_node

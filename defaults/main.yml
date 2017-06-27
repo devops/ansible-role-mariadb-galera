@@ -4,8 +4,12 @@ mariadb_repo: "True"
 mariadb_repo_baseurl: "http://yum.mariadb.org/5.5/centos7-amd64/"
 mariadb_root_username: root
 mariadb_root_password: root
+
+# change port for client/server.
+# For exemple, you can let HAProxy take care of the default port.
 mariadb_client_port: 3306
 mariadb_server_port: 3306
+
 mariadb_users: []
 mariadb_mysql_pid: /var/run/mysql/mysql.pid
 

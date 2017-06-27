@@ -11,30 +11,44 @@
     setype: mysqld_db_t
   when: galera_mysql_datadir is defined
 
+- name: Setup datadir
+  ini_file:
+    path: "{{ mariadb_config_dir }}server.cnf"
+    section: mysqld
+    option: datadir
+    value: "{{ galera_mysql_datadir }}"
+
 - name: Create mysqld logfile
   file:
     path: "{{ mariadb_log }}"
-    state: file
+    state: touch
     owner: "{{ mariadb_daemon_user }}"
     group: "{{ mariadb_daemon_user }}"
   when: mariadb_log is defined
 
-- name: Setup mysqld log
+- name: Setup mysqld general-log
   ini_file:
     path: "{{ mariadb_config_dir }}server.cnf"
     owner: "{{ mariadb_daemon_user }}"
     group: "{{ mariadb_daemon_user }}"
     section: mysqld
-    option: log
+    option: general-log
+    value: on
+
+- name: Setup mysqld general-log-file
+  ini_file:
+    path: "{{ mariadb_config_dir}}server.cnf"
+    section: mysqld
+    option: general-log-file
     value: "{{ mariadb_log }}"
   when: mariadb_log is defined
 
 - name: Create mysqld logfile
   file:
     path: "{{ mariadb_log_error }}"
-    state: file
     owner: mysql
     group: mysql
+    state: touch
   when: mariadb_log_error is defined
 
 - name: Setup mysqld error log
@@ -56,14 +70,17 @@
     mode: 0755
     setype: mysqld_db_t
 
-- name: Initialize datadir
-  command: |
-    /usr/bin/mysql_install_db --datadir=/appli/mysql/
-  args:
-    creates: /appli/mysql/mysql
+- name: Setup mysqld listening port to {{ mariadb_server_port }}
+  ini_file:
+    path: "{{ mariadb_config_dir }}server.cnf"
+    section: server
+    option: port
+    value: "{{ mariadb_server_port }}"
 
-- name: Ensure MariaDB is started and enabled on boot.
-  service:
-    name: "{{ mariadb_daemon }}"
-    state: started
-    enabled: yes
+- name: Setup mysql client port to {{ mariadb_client_port }}
+  ini_file:
+    path: "{{ mariadb_config_dir }}server.cnf"
+    section: client
+    option: port
+    value: "{{ mariadb_client_port }}"
+

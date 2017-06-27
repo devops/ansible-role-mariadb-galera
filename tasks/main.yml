@@ -11,6 +11,7 @@
 
 # Configure MariaDB.
 - include: config.yml
+- include: initialize_db.yml
 - include: secure.yml
 - include: galera.yml
 - include: users.yml

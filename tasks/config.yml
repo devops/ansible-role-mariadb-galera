@@ -20,11 +20,13 @@
 
 - name: Create mysqld logfile
   file:
-    path: "{{ mariadb_log }}"
+    path: "{{ mariadb_general_log_file }}"
     state: touch
     owner: "{{ mariadb_daemon_user }}"
     group: "{{ mariadb_daemon_user }}"
-  when: mariadb_log is defined
+  when:
+    - mariadb_general_log
+    - mariadb_general_log_file is defined
 
 - name: Setup mysqld general-log
   ini_file:
@@ -33,24 +35,30 @@
     group: "{{ mariadb_daemon_user }}"
     section: mysqld
     option: general-log
-    value: on
-  when: mariadb_log is defined
+    value: "{{ mariadb_general_log }}"
+  when:
+    - mariadb_general_log
+    - mariadb_general_log_file is defined
 
 - name: Setup mysqld general-log-file
   ini_file:
     path: "{{ mariadb_config_dir}}server.cnf"
     section: mysqld
     option: general-log-file
-    value: "{{ mariadb_log }}"
-  when: mariadb_log is defined
+    value: "{{ mariadb_general_log_file }}"
+  when:
+    - mariadb_general_log
+    - mariadb_general_log_file is defined
 
 - name: Create mysqld logfile
   file:
-    path: "{{ mariadb_log_error }}"
+    path: "{{ mariadb_log_error_file }}"
     owner: mysql
     group: mysql
     state: touch
-  when: mariadb_log_error is defined
+  when:
+    - "{{ mariadb_log_error|d(False) }}"
+    - mariadb_log_error_file is defined
 
 - name: Setup mysqld error log
   ini_file:
@@ -59,8 +67,10 @@
     group: "{{ mariadb_daemon_user }}"
     section: mysqld
     option: log-error
-    value: "{{ mariadb_log_error }}"
-  when: mariadb_log_error is defined
+    value: "{{ mariadb_log_error_file }}"
+  when:
+    - "{{ mariadb_log_error|d(False) }}"
+    - mariadb_log_error_file is defined
 
 - name: Create mysqld PID dir
   file:

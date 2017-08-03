@@ -34,6 +34,7 @@
     section: mysqld
     option: general-log
     value: on
+  when: mariadb_log is defined
 
 - name: Setup mysqld general-log-file
   ini_file:

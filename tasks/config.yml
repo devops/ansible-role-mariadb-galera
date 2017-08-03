@@ -1,8 +1,95 @@
+# vim: ft=ansible :
 ---
 # tasks file for config
+- name: MariaDB-Galera - Config | Create datadir
+  file:
+    path: "{{ galera_mysql_datadir }}"
+    state: directory
+    owner: "{{ mariadb_daemon_user }}"
+    group: "{{ mariadb_daemon_user }}"
+    mode: 0755
+    setype: mysqld_db_t
+  when: galera_mysql_datadir is defined
 
-- name: Ensure MariaDB is started and enabled on boot.
-  service:
-    name: "{{ mariadb_daemon }}"
-    state: started
-    enabled: yes
+- name: MariaDB-Galera - Config | Setup datadir
+  ini_file:
+    path: "{{ mariadb_config_dir }}server.cnf"
+    section: mysqld
+    option: datadir
+    value: "{{ galera_mysql_datadir }}"
+
+- name: MariaDB-Galera - Config | Create mysqld logfile
+  file:
+    path: "{{ mariadb_general_log_file }}"
+    state: touch
+    owner: "{{ mariadb_daemon_user }}"
+    group: "{{ mariadb_daemon_user }}"
+  when:
+    - "{{ mariadb_general_log|d(false)|bool }}"
+    - mariadb_general_log_file is defined
+
+- name: MariaDB-Galera - Config | Setup mysqld general-log
+  ini_file:
+    path: "{{ mariadb_config_dir }}server.cnf"
+    owner: "{{ mariadb_daemon_user }}"
+    group: "{{ mariadb_daemon_user }}"
+    section: mysqld
+    option: general-log
+    value: "{{ mariadb_general_log|d(false)|bool|lower }}"
+
+- name: MariaDB-Galera - Config | Setup mysqld general-log-file
+  ini_file:
+    path: "{{ mariadb_config_dir}}server.cnf"
+    section: mysqld
+    option: general-log-file
+    value: "{{ mariadb_general_log_file }}"
+  when:
+    - mariadb_general_log_file is defined
+
+- name: MariaDB-Galera - Config | Create mysqld logfile
+  file:
+    path: "{{ mariadb_log_error_file }}"
+    owner: mysql
+    group: mysql
+    state: touch
+  when:
+    - "{{ mariadb_log_error|d(false)|bool }}"
+    - mariadb_log_error_file is defined
+
+- name: MariaDB-Galera - Config | Setup mysqld error log
+  ini_file:
+    path: "{{ mariadb_config_dir }}server.cnf"
+    owner: "{{ mariadb_daemon_user }}"
+    group: "{{ mariadb_daemon_user }}"
+    section: mysqld
+    option: log-error
+    value: "{{ mariadb_log_error_file }}"
+  when:
+    - "{{ mariadb_log_error|d(false)|bool }}"
+    - mariadb_log_error_file is defined
+
+- name: MariaDB-Galera - Config | Create mysqld PID dir
+  file:
+    path: "{{ mariadb_pid_file | dirname }}"
+    state: directory
+    owner: "{{ mariadb_daemon_user }}"
+    group: "{{ mariadb_daemon_user }}"
+    mode: 0755
+    setype: mysqld_db_t
+
+- name: MariaDB-Galera - Config | Setup mysqld listening port to {{ mariadb_server_port }}
+  ini_file:
+    path: "{{ mariadb_config_dir }}server.cnf"
+    section: server
+    option: port
+    value: "{{ mariadb_server_port }}"
+  when: mariadb_server_port is defined
+
+- name: MariaDB-Galera - Config | Setup mysql client port to {{ mariadb_client_port }}
+  ini_file:
+    path: "{{ mariadb_config_dir }}server.cnf"
+    section: client
+    option: port
+    value: "{{ mariadb_client_port }}"
+  when: mariadb_client_port is defined
+

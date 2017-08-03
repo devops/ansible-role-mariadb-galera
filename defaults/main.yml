@@ -4,7 +4,19 @@ mariadb_repo: "True"
 mariadb_repo_baseurl: "http://yum.mariadb.org/5.5/centos7-amd64/"
 mariadb_root_username: root
 mariadb_root_password: root
+
+# change port for client/server.
+# For exemple, you can let HAProxy take care of the default port.
+mariadb_client_port: 3306
+mariadb_server_port: 3306
+
 mariadb_users: []
+mariadb_mysql_pid: /var/run/mysql/mysql.pid
+
+mariadb_general_log: no
+mariadb_general_log_file: /var/log/mysql.log
+mariadb_log_error: yes
+mariadb_log_error_file: /var/log/mysql.err
 
 # Clustercheck Configure
 galera_clustercheck_enable: false
